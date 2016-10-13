@@ -1,0 +1,37 @@
+<idea-plugin version="2">
+  <id>io.github.yeagy.jaxrs.GenClientPlugin</id>
+  <name>Generate JAX-RS client</name>
+  <version>0.1</version>
+  <vendor email="cyeagy@gmail.com" url="yeagy.github.io">Chris Yeagy</vendor>
+
+  <description><![CDATA[
+      Generate JAX-RS resource source files.
+    ]]></description>
+
+  <change-notes><![CDATA[
+      0.1 - Alpha. Generate a single Resource at a time.
+    ]]>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="141.0"/>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+       on how to target different products -->
+  <!-- uncomment to enable plugin in all products
+  <depends>com.intellij.modules.lang</depends>
+  -->
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <!-- Add your actions here -->
+    <action id="io.github.yeagy.jaxrs.GenerateClientAction" class="io.github.yeagy.jaxrs.GenerateClientAction" text="Generate JAX-RS Client"
+            description="Generate JAX-RS Client">
+      <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
+  </actions>
+
+</idea-plugin>
