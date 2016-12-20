@@ -2,6 +2,7 @@ package io.github.yeagy.jaxrs;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -35,8 +36,34 @@ public class GenerateClientAction extends AnAction {
     private static final Logger LOG = Logger.getInstance(GenerateClientAction.class);
 
     @Override
-    public void actionPerformed(AnActionEvent anActionEvent) {
-        new GenerateClientDialog(anActionEvent.getProject()).show();
+    public void actionPerformed(AnActionEvent event) {
+        Module module = event.getData(DataKeys.MODULE);
+        VirtualFile file = event.getData(DataKeys.VIRTUAL_FILE);
+        String className = possibleClientClassName(event.getProject(), module, file);
+        new GenerateClientDialog(event.getProject(), module, className).show();
+    }
+
+    private String possibleClientClassName(Project project, Module module, VirtualFile file) {
+        if (file != null && (file.getName().endsWith(".java") || file.getName().endsWith(".class"))) {
+            Set<URL> urls = new HashSet<URL>();
+            extractUrlsFromModule(project, module, urls);
+            URLClassLoader classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), this.getClass().getClassLoader());
+
+            String path = file.getPath().substring(0, file.getPath().length() - 5);
+            int idx = path.lastIndexOf("/");
+            while (idx >= 0) {
+                try {
+                    String className = path.substring(idx + 1, path.length()).replace("/", ".");
+                    Class<?> klass = classLoader.loadClass(className);
+                    if (klass.getAnnotation(Path.class) != null) {
+                        return className;
+                    }
+                } catch (ClassNotFoundException e) {
+                }
+                idx = path.lastIndexOf("/", idx - 1);
+            }
+        }
+        return "";
     }
 
     private void generateModuleClient(Project project, String moduleName, String className, boolean async) {
@@ -97,19 +124,20 @@ public class GenerateClientAction extends AnAction {
 
     private class GenerateClientDialog extends DialogWrapper {
         private final Project project;
-        private final JTextField targetInput = new JTextField();
+        private final JTextField targetInput;
         private final ComboBox moduleDropdown;
-        private final Checkbox asyncBox = new Checkbox("Async clients?");
+        private final Checkbox asyncBox = new Checkbox("Asynchronous Client");
 
-        GenerateClientDialog(Project project) {
+        GenerateClientDialog(Project project, Module module, String className) {
             super(project);
             this.project = project;
             setTitle("Generate JAX-RS Client");
-            moduleDropdown = createModuleDropdown(project);
+            targetInput = new JTextField(className);
+            moduleDropdown = createModuleDropdown(project, module);
             init();//call at the end!!!
         }
 
-        private ComboBox createModuleDropdown(Project project) {
+        private ComboBox createModuleDropdown(Project project, Module selectedModule) {
             Module[] modules = ModuleManager.getInstance(project).getModules();
             List<String> names = new ArrayList<String>();
             for (Module module : modules) {
@@ -121,13 +149,17 @@ public class GenerateClientAction extends AnAction {
                     }
                 }
             }
-            return new ComboBox(names.toArray(), -1);
+            ComboBox comboBox = new ComboBox(names.toArray(), -1);
+            if (selectedModule != null) {
+                comboBox.setSelectedItem(selectedModule.getName());
+            }
+            return comboBox;
         }
 
         @Override
         protected JComponent createCenterPanel() {
             JPanel panel = new JPanel(new VerticalFlowLayout());
-            panel.add(new JLabel("Generate JAX-RS Client v0.2.1"));
+            panel.add(new JLabel("Generate JAX-RS Client v0.2.2"));
             panel.add(new JLabel("Select Module"));
             panel.add(moduleDropdown);
             panel.add(new JLabel("Full Class Name"));

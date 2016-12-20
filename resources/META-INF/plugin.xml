@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>io.github.yeagy.jaxrs.GenClientPlugin</id>
   <name>Generate JAX-RS client</name>
-  <version>0.1</version>
+  <version>0.2.2</version>
   <vendor email="cyeagy@gmail.com" url="yeagy.github.io">Chris Yeagy</vendor>
 
   <description><![CDATA[
@@ -9,7 +9,7 @@
     ]]></description>
 
   <change-notes><![CDATA[
-      0.1 - Alpha. Generate a single Resource at a time.
+      0.2.2 - Can select from the project view popup or tools menu.
     ]]>
   </change-notes>
 
@@ -28,9 +28,13 @@
 
   <actions>
     <!-- Add your actions here -->
-    <action id="io.github.yeagy.jaxrs.GenerateClientAction" class="io.github.yeagy.jaxrs.GenerateClientAction" text="Generate JAX-RS Client"
-            description="Generate JAX-RS Client">
+    <action id="io.github.yeagy.jaxrs.GenerateClientAction" class="io.github.yeagy.jaxrs.GenerateClientAction"
+            text="Generate JAX-RS Client" description="Generate JAX-RS Client">
       <add-to-group group-id="ToolsMenu" anchor="last"/>
+    </action>
+    <action id="io.github.yeagy.jaxrs.HidableGenerateClientAction" class="io.github.yeagy.jaxrs.HidableGenerateClientAction"
+            text="Generate JAX-RS Client" description="Generate JAX-RS Client">
+      <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
     </action>
   </actions>
 
